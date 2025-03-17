@@ -6,11 +6,13 @@
 // put function declarations here:
 #define ADC1_ADDRESS 0x48
 #define DAC_ADDRESS 0x60
+#define TARGET_VOLTAGE 2000
 
 Adafruit_MCP4725 dac;
 ADS1115_WE adc1 = ADS1115_WE(ADC1_ADDRESS);
 
 float readChannel(ADS1115_MUX channel);
+int output;
 
 void setup()
 {
@@ -18,6 +20,9 @@ void setup()
   Serial.begin(115200);
   Wire.setPins(6, 7); //(9,10)
   Wire.begin();
+
+  dac.begin(DAC_ADDRESS);
+  dac.setVoltage(0, false);
 
   if (!adc1.init())
   {
@@ -36,16 +41,22 @@ void loop()
   Serial.print(voltage);
 
   Serial.print(",   1: ");
-  voltage = readChannel(ADS1115_COMP_1_GND);
+  // voltage = readChannel(ADS1115_COMP_1_GND);
   Serial.print(voltage);
 
   Serial.print(",   2: ");
-  voltage = readChannel(ADS1115_COMP_2_GND);
+  // voltage = readChannel(ADS1115_COMP_2_GND);
   Serial.print(voltage);
 
   Serial.print(",   3: ");
-  voltage = readChannel(ADS1115_COMP_3_GND);
+  // voltage = readChannel(ADS1115_COMP_3_GND);
   Serial.println(voltage);
+  output += 10;
+  if (output >= 4095)
+  {
+    output = 0;
+  }
+  dac.setVoltage(2000, false);
 
   delay(1000);
 }
@@ -54,6 +65,6 @@ float readChannel(ADS1115_MUX channel)
 {
   float voltage = 0.0;
   adc1.setCompareChannels(channel);
-  voltage = adc1.getResult_V(); // alternative: getResult_mV for Millivolt
+  voltage = adc1.getResult_mV(); // alternative: getResult_mV for Millivolt
   return voltage;
 }
