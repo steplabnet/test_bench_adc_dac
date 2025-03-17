@@ -1,11 +1,14 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <ADS1115_WE.h>
+#include <Adafruit_MCP4725.h>
 
 // put function declarations here:
-#define I2C_ADDRESS 0x48
+#define ADC1_ADDRESS 0x48
+#define DAC_ADDRESS 0x60
 
-ADS1115_WE adc1 = ADS1115_WE(I2C_ADDRESS);
+Adafruit_MCP4725 dac;
+ADS1115_WE adc1 = ADS1115_WE(ADC1_ADDRESS);
 
 float readChannel(ADS1115_MUX channel);
 
