@@ -3,6 +3,11 @@
 #include <ADS1115_WE.h>
 
 // put function declarations here:
+#define I2C_ADDRESS 0x48
+
+ADS1115_WE adc1 = ADS1115_WE(I2C_ADDRESS);
+
+float readChannel(ADS1115_MUX channel);
 
 void setup()
 {
@@ -10,31 +15,42 @@ void setup()
   Serial.begin(115200);
   Wire.setPins(6, 7); //(9,10)
   Wire.begin();
+
+  if (!adc1.init())
+  {
+    Serial.println("ADS1115 not connected");
+  }
+  adc1.setVoltageRange_mV(ADS1115_RANGE_6144); // comment line/change parameter to change range
+  adc1.setMeasureMode(ADS1115_CONTINUOUS);     // comment line/change parameter to change mode
 }
 
 void loop()
 {
-  byte error, address;
-  int nDevices = 0;
+  float voltage = 0.0;
 
-  for (address = 1; address < 127; address++)
-  {
-    // Send a test write to the address to see if a device responds
-    Wire.beginTransmission(address);
-    error = Wire.endTransmission();
+  Serial.print("0: ");
+  voltage = readChannel(ADS1115_COMP_0_GND);
+  Serial.print(voltage);
 
-    if (error == 0)
-    {
-      Serial.print("I2C device found at address 0x");
-      Serial.println(address, HEX);
-      nDevices++;
-    }
-  }
+  Serial.print(",   1: ");
+  voltage = readChannel(ADS1115_COMP_1_GND);
+  Serial.print(voltage);
 
-  if (nDevices == 0)
-  {
-    Serial.println("No I2C devices found.");
-  }
+  Serial.print(",   2: ");
+  voltage = readChannel(ADS1115_COMP_2_GND);
+  Serial.print(voltage);
 
-  delay(5000); // Wait 5 seconds before scanning again (optional)
+  Serial.print(",   3: ");
+  voltage = readChannel(ADS1115_COMP_3_GND);
+  Serial.println(voltage);
+
+  delay(1000);
+}
+
+float readChannel(ADS1115_MUX channel)
+{
+  float voltage = 0.0;
+  adc1.setCompareChannels(channel);
+  voltage = adc1.getResult_V(); // alternative: getResult_mV for Millivolt
+  return voltage;
 }
